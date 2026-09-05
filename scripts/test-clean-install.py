@@ -8,6 +8,8 @@ import sys
 import tempfile
 import unittest
 
+from skill_hosts import HOST_PATHS
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -50,8 +52,9 @@ class CleanInstallTests(unittest.TestCase):
             alias = home / ".codex/prompts/devgod-audit.md"
             self.assertIn(str(source.resolve()), alias.read_text())
             self.assertNotIn(str(old), alias.read_text())
-            # Remove only the known fixture links to the old export.
-            for link in list(home.rglob("devgod")):
+            # Python 3.10 globbing omits dangling directory links; use known host paths.
+            for relative in set(HOST_PATHS.values()):
+                link = home / relative
                 if link.is_symlink() and link.readlink() == old.resolve():
                     link.unlink()
             run("install-native-skills.py")
@@ -61,7 +64,7 @@ class CleanInstallTests(unittest.TestCase):
             self.assertEqual(list(project.iterdir()), [])
             self.assertFalse(list(home.rglob("devgod*.md")))
             self.assertFalse(list(home.rglob("devgod*.toml")))
-            self.assertFalse(any(path.is_symlink() for path in home.rglob("*")))
+            self.assertFalse(any((home / relative).is_symlink() for relative in HOST_PATHS.values()))
 
 
 if __name__ == "__main__":
