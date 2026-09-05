@@ -26,7 +26,7 @@ Symlinks point agent skill dirs at this clone so edits are live.
 |---|---|
 | `SKILL.md` | Router only - load on trigger |
 | `references/` | Agent modules (on demand) |
-| `commands/` | Cursor slash command stubs |
+| `commands/` | Portable command instructions used by host alias adapters |
 | `docs/` | Human docs (not bulk-loaded by agents) |
 | `scripts/` | Scanners and installers |
 | `templates/` | CI, pgTAP, package.json snippets |
@@ -47,6 +47,9 @@ Symlinks point agent skill dirs at this clone so edits are live.
 1. Extend `scripts/devgod-scan.sh` or `check-rls-migration.sh` with low false-positive checks.
 2. Mirror docs in `references/enforcement.md` / `references/enforcement-rules.md` and `docs/enforcement-setup.md`.
 3. Keep templates in `templates/` copy-paste ready.
+
+For Action upgrades, follow [dependency update checks](docs/releasing.md#dependency-updates).
+Workflow pins, consumer templates, and pin regression checks must change together.
 
 ### Docs
 

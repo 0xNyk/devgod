@@ -126,6 +126,9 @@ gstack pipeline for high-stakes work:
 
 ## Subagents and delegation
 
+Apply `agent-model-selection.md` before setup or model choice, and
+`multi-agent-orchestration.md` before an actual multi-agent run.
+
 Use subagents / Task tool when work is:
 - **Noisy** - lots of search/read before a small output
 - **Bounded** - clear deliverable (report, file list, security scan)

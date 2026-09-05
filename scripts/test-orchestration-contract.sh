@@ -42,4 +42,41 @@ mutate missing_handoff_trace 'd["trace_policy"]["events"].remove("handoff")'
 mutate self_review 'd["review"]["independent_reviewer"]=d["review"]["owner"]'
 mutate illustrative_approval 'd["receipt_kind"]="illustrative_fixture"'
 mutate no_independent_verify 'd["synthesis"]["independent_verification"]=False'
+mutate legacy_schema 'd["schema_version"]=1'
+mutate missing_model 'd["agents"][1].pop("model_selection")'
+mutate unavailable_model 'd["agents"][1]["model_selection"]["model"]="unavailable"'
+mutate unsupported_effort 'd["agents"][1]["model_selection"]["reasoning_effort"]="unsupported"'
+mutate unresolved_inheritance 'd["agents"][1]["model_selection"]["model"]="inherit"'
+mutate missing_vision 'd["agents"][2]["model_selection"]["available_capabilities"]=["tool_use"]'
+mutate silent_fallback 'd["agents"][1]["model_selection"]["fallback"]="auto"'
+mutate no_catalog_evidence 'd["agents"][1]["model_selection"]["evidence_ref"]=""'
+mutate malformed_catalog 'd["agents"][1]["model_selection"]["available_models"]=[{}]'
+mutate host_concurrency 'd["limits"]["host_concurrency_limit"]=2'
+mutate fractional_concurrency 'd["limits"]["max_concurrent_agents"]=2.5'
+mutate infinite_budget 'd["limits"]["max_cost_usd"]=float("inf")'
+mutate negative_descendants 'd["agents"][1]["budget"]["max_descendants"]=-1'
+mutate nested_write 'd["lanes"][2]["write"]=["artifacts/code/nested"]'
+mutate parent_write 'd["lanes"][2]["write"]=["artifacts"]'
+python3 - "$T/captured.json" "$V" <<'PY'
+import importlib.util
+import json
+import sys
+
+spec=importlib.util.spec_from_file_location('contract',sys.argv[2])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+d=json.load(open(sys.argv[1]))
+# A valid chain distinguishes total descendants from immediate children.
+d['limits']['max_depth']=3
+d['limits']['max_retries_per_task']=0
+d['agents'][1]['tools'].append('browser')
+d['agents'][1]['denied_tools'].remove('browser')
+d['agents'][1]['budget']['max_descendants']=1
+d['agents'][2]['parent_id']='code_worker'
+d['delegations'][0]['authority_tools'].append('browser')
+d['delegations'][1]['from']='code_worker'
+assert module.validate(d)==([],[]), module.validate(d)
+d['agents'][0]['budget']['max_descendants']=1
+errors,gates=module.validate(d)
+assert not errors and 'total descendants exceed budget at manager' in gates, (errors,gates)
+PY
 echo "orchestration contract fixtures passed"

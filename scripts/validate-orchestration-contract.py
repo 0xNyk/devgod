@@ -2,12 +2,13 @@
 '''Validate a bounded multi-agent orchestration contract.'''
 
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, json, math, re, sys
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from evidence_path import regular_input_file
+from orchestration_models import validate_selection
 
 IDENT=re.compile(r'^[a-z][a-z0-9_-]{1,63}$')
 TOOLS={'read','search','edit','shell','browser','network','message','deploy','money','permission_admin'}
@@ -19,29 +20,34 @@ def lane(v:Any)->bool:
     if not text(v): return False
     p=PurePosixPath(v)
     return not p.is_absolute() and '..' not in p.parts and '.' not in p.parts
-def positive(v:Any)->bool:return isinstance(v,(int,float)) and not isinstance(v,bool) and v>0
+def positive(v:Any)->bool:return isinstance(v,(int,float)) and not isinstance(v,bool) and math.isfinite(v) and v>0
+def count(v:Any,minimum:int=0)->bool:return isinstance(v,int) and not isinstance(v,bool) and v>=minimum
 
 def validate(d:Any)->tuple[list[str],list[str]]:
     e=[];g=[]
     root={'schema_version','receipt_kind','goal','limits','agents','delegations','lanes','join','failure_policy','trace_policy','synthesis','review'}
     if not isinstance(d,dict):return ['root must be an object'],[]
     if set(d)!=root:e.append(f'root keys must be exactly {sorted(root)}')
-    if d.get('schema_version')!=1:e.append('schema_version must be 1')
+    if d.get('schema_version')!=2:e.append('schema_version must be 2; recompile v1 with model selection and concurrency limits')
     if d.get('receipt_kind') not in {'illustrative_fixture','captured_contract'}:e.append('invalid receipt_kind')
     goal=d.get('goal',{})
     if set(goal)!={'id','summary','requirements','multi_agent_justification'}:e.append('goal keys invalid')
     if not ident(goal.get('id')) or not text(goal.get('summary')) or not isinstance(goal.get('requirements'),list) or not goal.get('requirements') or any(not ident(x) for x in goal.get('requirements',[])) or not text(goal.get('multi_agent_justification')):e.append('goal content invalid')
     limits=d.get('limits',{})
-    lkeys={'max_agents','max_depth','max_fanout','max_steps','max_cost_usd','max_wall_seconds','max_retries_per_task','no_progress_limit','synthesis_reserve_cost_usd'}
-    if set(limits)!=lkeys or any(not positive(limits.get(k)) for k in lkeys):e.append('limits invalid')
+    lkeys={'max_agents','max_depth','max_fanout','max_steps','max_cost_usd','max_wall_seconds','max_retries_per_task','no_progress_limit','synthesis_reserve_cost_usd','max_concurrent_agents','host_concurrency_limit'}
+    zero_counts={'max_retries_per_task'}
+    positive_counts={'max_agents','max_depth','max_fanout','max_steps','no_progress_limit','max_concurrent_agents','host_concurrency_limit'}
+    if not isinstance(limits,dict) or set(limits)!=lkeys or any(not count(limits.get(k)) for k in zero_counts) or any(not count(limits.get(k),1) for k in positive_counts) or any(not positive(limits.get(k)) for k in lkeys-zero_counts-positive_counts):return ['limits invalid'],g
+    if limits['max_concurrent_agents']>min(limits['max_agents'],limits['host_concurrency_limit']):g.append('concurrency exceeds agent allocation or observed host limit')
     agents=d.get('agents',[]); amap={}; roots=[]
-    akeys={'id','role','parent_id','task','requirements','tools','denied_tools','destinations','secret_classes','approval_class','revocation_handle','budget','output_schema','stop_conditions'}
+    akeys={'id','role','parent_id','task','requirements','tools','denied_tools','destinations','secret_classes','approval_class','revocation_handle','budget','output_schema','stop_conditions','model_selection'}
     if not isinstance(agents,list) or len(agents)<2:e.append('agents must contain at least two entries');agents=[]
     for i,a in enumerate(agents):
         if not isinstance(a,dict) or set(a)!=akeys:e.append(f'agent {i} keys invalid');continue
         aid=a.get('id')
         if not ident(aid) or aid in amap:e.append(f'agent {i} id invalid or duplicate');continue
         amap[aid]=a
+        g.extend(f'agent {aid}: {issue}' for issue in validate_selection(a.get('model_selection')))
         if a.get('parent_id') is None:roots.append(aid)
         if not all(text(a.get(k)) for k in ('role','task','approval_class','revocation_handle')):e.append(f'agent {aid} text fields invalid')
         req=a.get('requirements');
@@ -54,7 +60,7 @@ def validate(d:Any)->tuple[list[str],list[str]]:
             if not isinstance(a.get(k),list) or any(not text(x) for x in a.get(k,[])):e.append(f'agent {aid} {k} invalid')
         if not isinstance(a.get('output_schema'),dict) or not a.get('output_schema'):e.append(f'agent {aid} output_schema required')
         budget=a.get('budget',{})
-        if set(budget)!={'max_steps','max_cost_usd','max_wall_seconds','max_descendants'} or any(not positive(budget.get(k)) for k in budget):e.append(f'agent {aid} budget invalid')
+        if not isinstance(budget,dict) or set(budget)!={'max_steps','max_cost_usd','max_wall_seconds','max_descendants'} or not count(budget.get('max_descendants')) or not count(budget.get('max_steps'),1) or any(not positive(budget.get(k)) for k in ('max_cost_usd','max_wall_seconds')):return [f'agent {aid} budget invalid'],g
     if len(roots)!=1:g.append('exactly one root agent required')
     if len(amap)>limits.get('max_agents',0):g.append('agent count exceeds global limit')
     covered=set().union(*(set(a.get('requirements',[])) for a in amap.values())) if amap else set()
@@ -90,6 +96,13 @@ def validate(d:Any)->tuple[list[str],list[str]]:
         color[n]=2
     for r in roots:visit(r,1)
     if any(v==0 for v in color.values()):g.append('all agents must be reachable from root')
+    for aid in amap:
+        descendants=set(); pending=list(children[aid])
+        while pending:
+            child=pending.pop()
+            if child not in descendants:
+                descendants.add(child);pending.extend(children[child])
+        if len(descendants)>amap[aid]['budget']['max_descendants']:g.append(f'total descendants exceed budget at {aid}')
     total_cost=sum(float(a.get('budget',{}).get('max_cost_usd',0)) for a in amap.values())
     total_steps=sum(float(a.get('budget',{}).get('max_steps',0)) for a in amap.values())
     if total_cost>float(limits.get('max_cost_usd',0)):g.append('agent cost allocations exceed global budget')
@@ -108,7 +121,8 @@ def validate(d:Any)->tuple[list[str],list[str]]:
         for k in ('worktree','browser_profile','artifact_dir'):
             if not lane(x.get(k)):e.append(f'lane {i} {k} invalid')
         for w in x.get('write',[]):
-            if w in writes and writes[w]!=aid:g.append(f'write lane {w} shared by {writes[w]} and {aid}')
+            for other,owner in writes.items():
+                if owner!=aid and (PurePosixPath(w)==PurePosixPath(other) or PurePosixPath(w) in PurePosixPath(other).parents or PurePosixPath(other) in PurePosixPath(w).parents):g.append(f'write lane {w} overlaps {other} owned by {owner}')
             writes[w]=aid
     if set(lane_agents)!=set(amap) or len(lane_agents)!=len(set(lane_agents)):g.append('lane declarations must cover each agent exactly once')
     join=d.get('join',{})

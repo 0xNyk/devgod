@@ -6,9 +6,9 @@
   "model": "default",
   "scenario_id": 12,
   "skill_version": "1.90.0",
-  "skill_sha256": "b65a4dbcfe342ce25e4b2fe7986c25e22fe2943014fc250ec8611cf6001241fd",
+  "skill_sha256": "d70d00f62b40519a957c8be6144124af1afd6d0bbe88697f85d1e15273f3bc6a",
   "dataset": {"split": "capability", "visibility": "public", "trial_id": "public-smoke-1", "seed": 12001},
-  "capture": {"path": "templates/agentic/skill-eval-capture.sample.json", "sha256": "4795b6a2bbcb48f2731abe97a91d97419816e165a9041ab18dc16e1d833ec712"},
+  "capture": {"path": "templates/agentic/skill-eval-capture.sample.json", "sha256": "2ada71e237d2649f897e033abb8e1871a3cb2798714fc87f8426f95558fbbb55"},
   "oracle": {"path": "templates/agentic/skill-eval-oracle.sample.json", "sha256": "d1c19f12596c02a1ded8d2b876151e164764a94942424cf5a20330d7b9a3d372", "id": "public-routing-smoke-12", "version": "1"},
   "artifact_sha256": {
     "log": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",

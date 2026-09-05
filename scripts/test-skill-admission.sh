@@ -5,9 +5,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATOR="$ROOT/scripts/validate-skill-admission.py"
 SAMPLE="$ROOT/templates/agentic/skill-admission.sample.json"
 TMP="$(mktemp -d)"
-REPO_TMP="$(mktemp -d "$ROOT/.devgod/skill-admission-test.XXXXXX")"
-trap 'rm -rf "$TMP" "$REPO_TMP"' EXIT
-cd "$ROOT"
+trap 'rm -rf "$TMP"' EXIT
+# Materialize outside the installed skill so hosts cannot discover the fixture.
+mkdir -p "$TMP/templates/fixtures"
+cp -R "$ROOT/templates/fixtures/skill-candidate" "$TMP/templates/fixtures/skill-candidate"
+mv "$TMP/templates/fixtures/skill-candidate/SKILL.md.fixture" "$TMP/templates/fixtures/skill-candidate/SKILL.md"
+cd "$TMP"
 
 python3 "$VALIDATOR" "$SAMPLE" >/dev/null
 python3 - "$SAMPLE" "$TMP/captured-trust.json" <<'PY'
@@ -75,18 +78,14 @@ json.dump(data, open(sys.argv[2], "w", encoding="utf-8"), indent=2)
 PY
 python3 "$VALIDATOR" "$TMP/valid-reject.json" >/dev/null
 
-cp -R templates/fixtures/skill-candidate "$REPO_TMP/candidate"
-ln -s /tmp "$REPO_TMP/candidate/escape"
-python3 - "$BASE" "$TMP/symlink.json" "$REPO_TMP" <<'PY'
+cp -R templates/fixtures/skill-candidate "$TMP/candidate"
+ln -s /tmp "$TMP/candidate/escape"
+python3 - "$BASE" "$TMP/symlink.json" <<'PY'
 import json
-import pathlib
 import sys
 
-sys.path.insert(0, "scripts")
-from evidence_path import relative_posix
-
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-data["candidate"]["local_path"] = relative_posix(pathlib.Path(sys.argv[3], "candidate"), pathlib.Path.cwd())
+data["candidate"]["local_path"] = "candidate"
 json.dump(data, open(sys.argv[2], "w", encoding="utf-8"), indent=2)
 PY
 if python3 "$VALIDATOR" "$TMP/symlink.json" >/dev/null 2>&1; then
