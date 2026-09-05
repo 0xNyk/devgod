@@ -14,6 +14,13 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 class CleanInstallTests(unittest.TestCase):
+    def test_package_has_only_one_discoverable_skill(self):
+        skills = [ROOT / "SKILL.md"]
+        for directory in ("agents", "assets", "commands", "docs", "evals", "references",
+                          "research", "scripts", "templates"):
+            skills.extend((ROOT / directory).rglob("SKILL.md"))
+        self.assertEqual(skills, [ROOT / "SKILL.md"], "Nested fixtures become installed skills")
+
     def test_export_relocation_and_complete_lifecycle(self):
         with tempfile.TemporaryDirectory(prefix="devgod-clean-install-") as temporary:
             base = Path(temporary)
