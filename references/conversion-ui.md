@@ -63,6 +63,10 @@ Rules:
 - Render the primary meaning and CTA without client JavaScript. Reserve hero dimensions, bound
   third-party tags, and measure field Core Web Vitals by page type and acquisition segment.
 
+Section blocks: Efferd's marketing categories (hero, features, pricing, testimonials, FAQ,
+logo cloud, footer, contact) cover this anatomy on a shadcn stack. Read each block with
+`shadcn view` before adding it, then de-genericize per `stack-rules.md` → Component sources.
+
 ## Portfolio and case-study pages
 
 - Lead with the work category, audience, constraint, role, and verifiable outcome—not a cinematic intro.

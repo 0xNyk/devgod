@@ -1,11 +1,21 @@
 # Stack rules (condensed)
 
-**Last verified**: 2026-08-21 · **Review cadence**: 3 months
+**Last verified**: 2026-09-06 · **Review cadence**: 3 months
 
 Framework-correctness for Next.js, Tailwind v4, shadcn/ui, React 19.
 Python services: see **`python.md`** (uv/ruff/FastAPI peer language).
 For the full catalog (grep scan, cacheLife table, 10-second slop grep),
 load `unmachined/references/stack-rules.md` when available.
+
+## Contents
+- [Version detection](#version-detection)
+- [Greenfield default stack](#greenfield-default-stack-binding)
+- [Component sources](#component-sources-binding)
+- [Tailwind v4 essentials](#tailwind-v4-essentials)
+- [Next.js 16 / App Router essentials](#nextjs-16--app-router-essentials)
+- [Python peer](#python-peer-services)
+- [shadcn de-genericization](#shadcn-de-genericization)
+- [10-second slop grep](#10-second-slop-grep)
 
 ## Version detection
 
@@ -29,7 +39,7 @@ recommended defaults):
 pnpm create next-app@latest <app> --ts --tailwind --eslint --app --src-dir \
   --import-alias "@/*" --use-pnpm
 cd <app>
-pnpm add -D shadcn@4.18.0            # pin current; then run the locked local CLI
+pnpm add -D shadcn@4.21.0            # pin current; then run the locked local CLI
 pnpm exec shadcn init                # components.json + @theme wiring; -b radix|base|aria
 pnpm exec shadcn add button input label field card dialog dropdown-menu sonner
 ```
@@ -39,6 +49,53 @@ flag errors, re-verify against `--help` / current official docs before
 asserting them — never patch from memory. Immediately after init, de-genericize
 (`--primary`, `--radius`, `--font-sans` off stock — section below) before
 building pages.
+
+## Component sources (binding)
+
+Three sources, in this order. Every one is copied source you own, never a
+runtime dependency; every install is reviewed like any third-party code
+(`skill-supply-chain.md` habits apply to registries too).
+
+| Source | Use for | Base | License (verified 2026-09-06) |
+|---|---|---|---|
+| **shadcn/ui** (`ui.shadcn.com/docs/components`) | Primitives: button, field, dialog, table, sidebar, chart, command | Radix, Base UI, or React Aria via `init -b` | MIT |
+| **Efferd** (`efferd.com/blocks`) | Section blocks: hero, pricing, testimonials, FAQ, logo cloud, footer, auth, app shell, dashboard | shadcn registry `@efferd`, 200+ items | Free tier for a subset; Pro/Team one-time commercial license |
+| **BoardUI** (`boardui.com/components`) | Agentic and data-dense dashboards: agent chat, thinking and log surfaces, data table, 17 charts | React Aria Components + own tokens and CLI; not shadcn | MIT (free), BoardUI License (Pro) |
+
+Rules:
+- **shadcn first.** A block or kit is chosen because it saves a section, not
+  because it replaces the primitive layer. Wrap and de-genericize blocks the
+  same way as primitives (section below); a stock Efferd hero is as generic as
+  a stock shadcn button.
+- **Efferd** registers as a namespaced registry, then installs per block:
+
+  ```jsonc
+  // components.json
+  { "registries": { "@efferd": "https://efferd.com/r/{name}.json" } }
+  ```
+
+  ```bash
+  pnpm exec shadcn view @efferd/hero-5        # read the files first
+  pnpm exec shadcn add  @efferd/hero-5 --dry-run
+  pnpm exec shadcn add  @efferd/hero-5
+  ```
+
+  Blocks pull transitive registry items (`@magicui/*`, `@bklit/*`) and npm
+  packages (`motion`, `@visx/*`); review each one and keep the list in the PR.
+  Pro access tokens live in `.env.local` as `${EFFERD_TOKEN}` header
+  expansion, never in `components.json` or git (the leak gate flags
+  `*_TOKEN=` lines).
+- **BoardUI** is a whole design system, not a block pack. Pick it as the base
+  for an agentic or dashboard product (`npx boardui@latest init`, then `add`),
+  and pair it only with `shadcn init -b aria` if shadcn primitives are also
+  needed. Never run Radix shadcn dialogs, menus, or popovers next to BoardUI's
+  React Aria ones in one app: two focus and keyboard models, two token sets.
+  Its tokens are Tailwind utilities, so map them into the project `@theme`
+  once instead of importing a second palette. The repository is young
+  (created 2026-09-01); pin the CLI version, vendor what you add, and
+  re-verify the API before every new component.
+- **Existing codebases** follow project truth. Do not add a second component
+  source to a repo that already has one unless the user decides it.
 
 ## Tailwind v4 essentials
 

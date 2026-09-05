@@ -164,6 +164,10 @@ time range in the URL when sharing the view is part of the job.
 
 ### Layout
 
+Starting points, after the principles above are answered: Efferd `@efferd/app-shell-*`
+and `@efferd/dashboard-*` on a shadcn stack; BoardUI chart, data table, and agent surfaces
+on a React Aria stack (`stack-rules.md` → Component sources). A kit sets the frame, not the KPI.
+
 ```
 ┌─────────────────────────────────────────┐
 │ [Nav] │ KPI KPI KPI [filter] │
