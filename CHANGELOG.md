@@ -1446,6 +1446,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- Component sources rule in `stack-rules.md`: shadcn/ui primitives first, Efferd blocks
+  through the `@efferd` shadcn registry with a view-then-add review step, and BoardUI as a
+  React Aria design system for agentic dashboards that is never mixed with Radix shadcn in
+  one app. Pointers from frontend, design-patterns, conversion-ui, and SKILL.md routing.
+  shadcn CLI pin refreshed to 4.21.0.
+
 ## 1.59.0 - 2026-07-15
 
 ### Added

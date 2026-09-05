@@ -139,7 +139,7 @@ Load **1 router + 2-4 leaf modules** max per task. Full table: **`references/MAN
 | Hermes profiles / memory / curator / cron / gateway / tools | `hermes-agent-integration.md` + coding-agent-hosts |
 | Autonomous measured code/config experiment loop | `autonomous-experimentation.md` + prompt-optimization or domain module |
 | SDK / API / CLI / plugin / contributor developer experience | `developer-experience.md` + API/OSS/browser modules as needed |
-| UI / components / forms | `frontend.md` → design-patterns, design-system, design-taste |
+| UI / components / forms / section blocks / dashboard kits (shadcn, Efferd, BoardUI) | `frontend.md` → design-patterns, design-system, design-taste; component sources in `stack-rules.md` |
 | Tokens / a11y / dashboards | `design-system.md`, `design-accessibility.md`, `design-patterns.md` |
 | Motion / density | `design-motion.md` |
 | Infographic, diagram, editorial image, thumbnail, logo, watermark, or social/banner asset | `visual-communication.md` → design-system + platform owner |

@@ -87,7 +87,7 @@ Agents: prefer this manifest over bulk-loading `docs/`.
 | `secure-package-html-preview.md` | Untrusted on-disk package HTML/document previews, sandboxed iframe, asset allowlist |
 | `frontend-i18n.md` | next-intl, locales |
 | `storybook-dx.md` | Optional Storybook |
-| `stack-rules.md` | Tailwind v4, Next 16, shadcn |
+| `stack-rules.md` | Tailwind v4, Next 16, shadcn, component sources (Efferd, BoardUI) |
 
 ## Backend
 

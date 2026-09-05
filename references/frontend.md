@@ -207,6 +207,9 @@ See `design-system.md` for tokens, `design-patterns.md` for layout, `design-tast
 - **FORBIDDEN**: hardcoded Tailwind colors (`text-red-500`, `bg-gray-100`, `bg-indigo-*`).
 - `className` is for layout/spacing/responsive - not for overriding component colors.
 - Restyle shadcn at the token layer (`--primary`, `--radius`, `--font-sans`).
+- Section blocks and dashboard kits: `stack-rules.md` → Component sources
+ (Efferd via the `@efferd` registry; BoardUI for React Aria agentic dashboards).
+ Review every pulled file; wrap and de-genericize blocks like primitives.
 - Mobile-first breakpoints. Test 320, 375, 768, 1280.
 - Flex + `gap-*`; no `space-y-*`.
 - New or redesigned surfaces: named tone + signature (`design-taste.md`) before JSX.
