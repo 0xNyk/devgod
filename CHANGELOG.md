@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Update immutable checkout and setup-python pins across workflows, consumer
+  templates, and regression checks. Document the complete dependency update process.
+
+- Apply host-aware agent setup and model selection before delegation, with explicit
+  role ownership, capability checks, user overrides, and verification requirements.
+- Orchestration schema v2 requires model choices and observed runtime identities,
+  checks concurrency limits, permits leaf workers with no descendants, and rejects
+  overlapping parent/child write paths. Recompile v1 contracts before new runs.
+- Store the admission sample as `SKILL.md.fixture` so installing DevGod does not
+  expose a second skill. Tests materialize the candidate outside the installed tree.
+
 ## Unreleased - public-prep
 
 Prepare the repository for public release: remove private context, add the

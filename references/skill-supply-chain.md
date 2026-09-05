@@ -105,6 +105,10 @@ capabilities, forged tree state, self-review, expired review, and unresolved tru
 The shipped sample is an `illustrative_fixture` and remains quarantined. Only a
 `captured_review` with real preserved evidence can authorize `trust`.
 
+The bundled candidate stores its entrypoint as `SKILL.md.fixture` to avoid native
+skill discovery. `bash scripts/test-skill-admission.sh` materializes it in a temporary
+workspace, validates the sample and rejection cases, then removes that workspace.
+
 The validator confirms receipt consistency. It does not independently establish repository
 ownership, execute the sandbox cases, or prove benign intent. Preserve the raw evidence it cites.
 

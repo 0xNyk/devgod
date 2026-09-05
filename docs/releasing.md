@@ -79,3 +79,29 @@ neither operation is part of the installer.
 CI checks out the public unmachined prose scanner at an immutable commit. Review
 changes to the scanner before updating that pin. `requirements-dev.txt` pins the
 Python fixture dependency and gives Dependabot a manifest it can update.
+
+## Dependency updates
+
+Dependabot updates executable workflows. Its PR may leave consumer templates and
+the expected pins in `scripts/test-action-runtime-pins.sh` unchanged. A pin mismatch
+fails CI until a maintainer reviews and synchronizes the whole change.
+
+1. Update the candidate branch from the default branch so existing fixes are included.
+2. Inspect the upstream release, resolved commit and signature, source diff, action
+   runtime, removed inputs, and minimum runner version. A verified signature alone
+   does not establish that the change is compatible or safe.
+3. Update every matching pin in `.github/workflows/`, `templates/github/`, and
+   `scripts/test-action-runtime-pins.sh`. Record the reviewed versions and evidence
+   in `research/github-actions-node24-2026-07.md`.
+4. Rebind the skill-eval samples, run the pin and documentation supply-chain checks,
+   and require hosted CI on the resulting commit before merge.
+
+```bash
+python3 scripts/rebind-skill-eval.py
+bash scripts/test-action-runtime-pins.sh
+python3 scripts/scan-doc-supply-chain.py
+bash scripts/validate-repo.sh
+```
+
+Retain exact SHA pins and the synchronization gate. Do not bypass a failed check to
+merge a bot proposal or mark the hosted checks green based on local results.

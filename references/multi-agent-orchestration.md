@@ -1,10 +1,12 @@
 # Multi-agent orchestration control plane
 
-**Last verified**: 2026-08-19 · **Review cadence**: 3 months
+**Last verified**: 2026-09-05 · **Review cadence**: 3 months
 
 Use this module when two or more agents, workers, or agent-as-tool calls collaborate on one goal.
 Do not add agents merely to simulate expertise. Start with a single agent; distribute work only
 when tasks are genuinely separable, latency matters, or isolation improves safety.
+Before compiling, apply `agent-model-selection.md` for native setup, role/model fit,
+supported effort, observed catalogs, and the distinction between policy and host enforcement.
 
 ## Compile before execution
 
@@ -24,6 +26,7 @@ Represent the orchestration as a bounded graph, not an informal group chat:
    missing-worker behavior, conflict resolution, and whether cancellation propagates.
 6. Reserve global budget for synthesis, verification, and cleanup. Child allocations plus reserve
    cannot exceed the parent's steps, cost, time, or concurrency limits.
+   Count the coordinator in concurrency limits; leaf workers declare zero descendants.
 
 ## Authoring surfaces (Claude Code, version-sensitive)
 
@@ -91,6 +94,11 @@ The orchestration must remain correct when the transport is absent.
 ## Contract and validator
 
 Copy `templates/agentic/orchestration-contract.sample.json` and validate before launch:
+
+Schema v2 requires `model_selection` per agent, `max_concurrent_agents`, and the
+observed `host_concurrency_limit`. Runtime v2 requires each worker's observed
+`execution` identity. Recompile v1 contracts and recapture runs; changing a version
+number or copying synthetic identities does not supply missing evidence.
 
 ```bash
 python3 scripts/validate-orchestration-contract.py orchestration-contract.json --json
