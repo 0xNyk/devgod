@@ -1,0 +1,25 @@
+# .gitignore
+.DS_Store
+*.swp
+*~
+.env
+.env.*
+!.env.example
+*.keypair
+id.json
+.idea/
+.vscode/
+*.log
+.cache/
+.venv/
+**/research/**/.venv/
+__pycache__/
+*.pyc
+.devgod/telemetry/
+.devgod/live-eval-runs/
+.devgod/eval-captures/
+.devgod/eval-jobs/
+.devgod/private-evals/
+
+# session state / plan artifacts (never publish)
+.devgod/

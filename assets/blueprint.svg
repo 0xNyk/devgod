@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-label="devgod architecture">
+  <rect width="1200" height="640" fill="#0a0a0a"/>
+  <text x="48" y="48" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="22" font-weight="600">devgod</text>
+  <text x="150" y="48" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="14">progressive disclosure — load only what the task needs</text>
+  <text x="48" y="72" fill="#525252" font-family="ui-monospace, Menlo, monospace" font-size="12">SKILL.md router · 40+ modules · scanners · slash commands · evals</text>
+
+  <rect x="48" y="100" width="1104" height="72" rx="8" fill="#141414" stroke="#262626"/>
+  <text x="68" y="132" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="13">1  SKILL.md</text>
+  <text x="68" y="152" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">thin router (~225 lines) · project-detect first · verbs · hard gates</text>
+
+  <rect x="48" y="196" width="340" height="148" rx="8" fill="#141414" stroke="#262626"/>
+  <text x="68" y="228" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="13">2  verbs</text>
+  <text x="68" y="256" fill="#a3a3a3" font-family="ui-monospace, Menlo, monospace" font-size="12">plan · audit · fix · ship</text>
+  <text x="68" y="278" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">schema · page · design · api</text>
+  <text x="68" y="300" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">flow · enforce · growth · agent</text>
+  <text x="68" y="324" fill="#525252" font-family="ui-monospace, Menlo, monospace" font-size="12">text or /devgod-*</text>
+
+  <rect x="430" y="196" width="340" height="148" rx="8" fill="#141414" stroke="#404040"/>
+  <text x="450" y="228" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="13">3  modules</text>
+  <text x="450" y="256" fill="#a3a3a3" font-family="ui-monospace, Menlo, monospace" font-size="12">references/*.md on demand</text>
+  <text x="450" y="278" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">design · frontend · backend</text>
+  <text x="450" y="300" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">billing · deploy · growth</text>
+  <text x="450" y="324" fill="#525252" font-family="ui-monospace, Menlo, monospace" font-size="12">1 router + 2–4 leaves / task</text>
+
+  <rect x="812" y="196" width="340" height="148" rx="8" fill="#141414" stroke="#262626"/>
+  <text x="832" y="228" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="13">4  gates</text>
+  <text x="832" y="256" fill="#a3a3a3" font-family="ui-monospace, Menlo, monospace" font-size="12">devgod-scan.sh --strict</text>
+  <text x="832" y="278" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">check-rls-migration.sh</text>
+  <text x="832" y="300" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">CI · pgTAP · PR template</text>
+  <text x="832" y="324" fill="#525252" font-family="ui-monospace, Menlo, monospace" font-size="12">checklist alone ≠ merge</text>
+
+  <rect x="48" y="368" width="1104" height="64" rx="8" fill="#0f0f0f" stroke="#262626"/>
+  <text x="68" y="396" fill="#fafafa" font-family="ui-monospace, Menlo, monospace" font-size="13">lifecycle</text>
+  <text x="68" y="416" fill="#a3a3a3" font-family="ui-monospace, Menlo, monospace" font-size="12">plan → build → audit → fix → enforce → ship</text>
+
+  <rect x="48" y="456" width="540" height="88" rx="8" fill="#0c0c0c" stroke="#1f1f1f"/>
+  <text x="68" y="488" fill="#e5e5e5" font-family="ui-monospace, Menlo, monospace" font-size="13">stack</text>
+  <text x="68" y="512" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">TypeScript · Rust · Next.js · Tailwind · shadcn · Supabase</text>
+
+  <rect x="612" y="456" width="540" height="88" rx="8" fill="#0c0c0c" stroke="#1f1f1f"/>
+  <text x="632" y="488" fill="#e5e5e5" font-family="ui-monospace, Menlo, monospace" font-size="13">pipelines</text>
+  <text x="632" y="512" fill="#737373" font-family="ui-monospace, Menlo, monospace" font-size="12">greenfield · landing · billing · privacy · upload · auth · loop-verify</text>
+
+  <rect x="48" y="564" width="1104" height="52" rx="8" fill="#0c0c0c" stroke="#1f1f1f"/>
+  <text x="68" y="596" fill="#525252" font-family="ui-monospace, Menlo, monospace" font-size="12">compose: unmachined · vercel react-best-practices · gstack cso / qa / ship</text>
+</svg>

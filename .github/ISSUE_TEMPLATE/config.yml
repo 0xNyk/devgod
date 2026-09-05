@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and usage help
+    url: https://github.com/0xNyk/devgod/discussions
+    about: Ask how a verb, module, or scanner works, or share a workflow.
+  - name: Report a vulnerability
+    url: https://github.com/0xNyk/devgod/security/advisories/new
+    about: Use private vulnerability reporting. Never post exploit details in a public issue.

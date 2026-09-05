@@ -1,0 +1,25 @@
+# devgod
+
+> Standalone product-engineering skill for coding agents (Cursor, Claude Code, Codex). A thin `SKILL.md` router loads only the modules a task needs across TypeScript, Python, Rust, Next.js, Tailwind, shadcn/ui, and Supabase, plus deterministic scanners, CI templates, slash commands, and evals. Loop: research, plan, build, browser QA, measure, enforce, ship, improve.
+
+## Start here
+
+- [README](README.md): positioning, install, verbs, trust, telemetry
+- [SKILL.md](SKILL.md): the router the agent reads first; hard gates and module triggers
+- [docs/getting-started.md](docs/getting-started.md): first session walkthrough
+
+## Reference
+
+- [references/MANIFEST.md](references/MANIFEST.md): index of every module with load triggers
+- [docs/verbs.md](docs/verbs.md): verb reference
+- [docs/slash-commands.md](docs/slash-commands.md): `/devgod-*` commands and loops
+- [docs/modules.md](docs/modules.md): module map
+- [docs/architecture.md](docs/architecture.md): how the skill loads
+- [docs/enforcement-setup.md](docs/enforcement-setup.md): CI and pre-commit wiring
+
+## Project
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): adding modules and evals
+- [SECURITY.md](SECURITY.md): supply-chain rules and vulnerability reporting
+- [SUPPORT.md](SUPPORT.md): where questions go
+- [CHANGELOG.md](CHANGELOG.md): release history

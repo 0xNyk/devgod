@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "devgod:scan": "bash scripts/devgod-scan.sh --strict",
+    "devgod:scan:design": "bash scripts/devgod-scan.sh --design",
+    "devgod:scan:backend": "bash scripts/devgod-scan.sh --backend",
+    "lint:ci": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:rls": "supabase test db"
+  }
+}

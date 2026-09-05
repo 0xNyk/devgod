@@ -1,0 +1,265 @@
+# Integrity checks for the devgod skill package itself
+# (Consumer app gates live in templates/github/devgod-gates.yml)
+
+name: validate
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clean-install:
+    name: Clean install (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Native install and command lifecycle (no model calls)
+        run: |
+          python3 scripts/test-native-skills.py
+          python3 scripts/test-command-aliases.py
+          python3 scripts/test-clean-install.py
+
+  integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install fixture dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          npm install --global typescript@7.0.2
+
+      - name: Validate repo structure
+        run: bash scripts/validate-repo.sh
+
+      - name: Private-context leak gate (runs the gate against this repo, not just its fixtures)
+        run: |
+          bash scripts/check-oss-leaks.sh --all \
+            --allow 'STRIPE_SECRET = "sk_live' \
+            --allow 'run_expect ".*trips DROPPER"' \
+            --allow 'record DROPPER ' \
+            --allow ':n@[a-z]+\.' \
+            --allow '\| \*\*Sink\*\* \|'
+          # allows: synthetic fixtures, the gate's own DROPPER recorder, the `n@decorator.` token the email check extracts from `\\n@app.get` inside JSON code strings,
+          # and malware-detection.md's sink-pattern table — none are leaks; keep this list short.
+
+      - name: Run package fixture contracts
+        run: |
+          bash scripts/test-repo-validation.sh
+          bash scripts/test-scan.sh
+          bash scripts/test-scan-false-done.sh
+          bash scripts/test-rebind-skill-eval.sh
+          bash scripts/test-research.sh
+          bash scripts/test-playwright-template.sh
+          bash scripts/test-product-metrics.sh
+          bash scripts/test-agentic-contract.sh
+          bash scripts/test-agentic-completion.sh
+          bash scripts/test-optimization-run.sh
+          bash scripts/test-security-eval-catalog.sh
+          bash scripts/test-github-signing.sh
+          bash scripts/test-csp-reporting.sh
+          bash scripts/test-oss-maintainer.sh
+          bash scripts/test-oss-leaks.sh
+          bash scripts/test-action-runtime-pins.sh
+          bash scripts/test-eval-bank.sh
+          bash scripts/test-live-evals.sh
+          bash scripts/test-skill-eval-run.sh
+          bash scripts/test-skill-eval-capture.sh
+          bash scripts/test-skill-eval-capture-manifest.sh
+          bash scripts/test-skill-eval-grading.sh
+          bash scripts/test-devgod-telemetry.sh
+          bash scripts/test-capability-promotion.sh
+          bash scripts/test-devgod-doctor.sh
+          bash scripts/test-host-activation.sh
+          python3 scripts/test-native-skills.py
+          python3 scripts/test-command-aliases.py
+          bash scripts/test-host-capabilities.sh
+          bash scripts/test-doc-supply-chain.sh
+          bash scripts/test-skill-admission.sh
+          bash scripts/test-agent-incident.sh
+          bash scripts/test-orchestration-contract.sh
+          bash scripts/test-orchestration-run.sh
+          bash scripts/test-browser-session.sh
+          bash scripts/test-browser-lane-run.sh
+          bash scripts/test-browser-lane-execution.sh
+          bash scripts/test-agent-memory.sh
+          bash scripts/test-coordination-envelope.sh
+          bash scripts/test-mcp-session.sh
+          bash scripts/test-mcp-content.sh
+          bash scripts/test-evidence-input-boundary.sh
+          bash scripts/test-evidence-output-boundary.sh
+          bash scripts/test-mcp-transcript.sh
+          bash scripts/test-output-gate.sh
+
+      - name: Shellcheck install scripts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          shellcheck --severity=warning -x \
+            scripts/validate-repo.sh \
+            scripts/install-all-agents.sh \
+            scripts/install-commands.sh \
+            scripts/check-rls-migration.sh \
+            scripts/test-rebind-skill-eval.sh \
+            scripts/test-scan-false-done.sh \
+            scripts/test-host-activation.sh \
+            scripts/test-repo-validation.sh \
+            scripts/test-research.sh \
+            scripts/test-playwright-template.sh \
+            scripts/test-product-metrics.sh \
+            scripts/test-agentic-contract.sh \
+            scripts/test-agentic-completion.sh \
+            scripts/test-optimization-run.sh \
+            scripts/test-security-eval-catalog.sh \
+            scripts/test-github-signing.sh \
+            scripts/test-csp-reporting.sh \
+            scripts/test-oss-maintainer.sh \
+            scripts/test-action-runtime-pins.sh \
+            scripts/test-eval-bank.sh \
+            scripts/test-live-evals.sh \
+            scripts/test-skill-eval-run.sh \
+            scripts/test-skill-eval-capture.sh \
+            scripts/test-skill-eval-batch.sh \
+            scripts/test-skill-eval-capture-manifest.sh \
+            scripts/test-skill-eval-grading.sh \
+            scripts/test-devgod-telemetry.sh \
+            scripts/test-capability-promotion.sh \
+            scripts/test-devgod-doctor.sh \
+            scripts/test-host-activation.sh \
+            scripts/test-host-capabilities.sh \
+            scripts/test-doc-supply-chain.sh \
+            scripts/test-skill-admission.sh \
+            scripts/test-agent-incident.sh \
+            scripts/test-orchestration-contract.sh \
+            scripts/test-orchestration-run.sh \
+            scripts/test-browser-session.sh \
+            scripts/test-browser-lane-run.sh \
+            scripts/test-browser-lane-execution.sh \
+            scripts/test-agent-memory.sh \
+            scripts/test-coordination-envelope.sh \
+            scripts/test-mcp-session.sh \
+            scripts/test-mcp-content.sh \
+            scripts/test-evidence-input-boundary.sh \
+            scripts/test-evidence-output-boundary.sh \
+            scripts/test-mcp-transcript.sh \
+            scripts/test-output-gate.sh \
+            scripts/devgod-output-gate.sh
+
+  # Static eval bank integrity (no model API). Always run on main/PR so skill
+  # routing regressions fail CI. See scripts/run-evals.sh and evals/evals.json.
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.11"
+
+      - name: Eval bank smoke
+        run: bash scripts/run-evals.sh --smoke
+
+      - name: Plan sample validates
+        run: |
+          bash scripts/validate-plan.sh templates/plan.sample.json
+          bash scripts/test-plan-complexity.sh
+          bash scripts/test-plan-fleet.sh
+          python3 scripts/validate-agentic-contract.py templates/agentic/execution-contract.sample.json
+          python3 scripts/validate-agentic-trajectory.py templates/agentic/trajectory.sample.json --contract templates/agentic/execution-contract.sample.json
+          python3 scripts/validate-agentic-completion.py templates/agentic/completion-receipt.sample.json --evidence-root .
+          python3 scripts/validate-product-metrics.py templates/product-metrics/measurement-plan.sample.json
+          python3 scripts/validate-optimization-run.py templates/agentic/optimization-run.sample.json --evidence-root .
+          python3 scripts/validate-security-eval-catalog.py templates/agentic/security-eval-catalog.sample.json
+          python3 scripts/validate-skill-eval-run.py templates/agentic/skill-eval-run.sample.json
+          python3 scripts/capture-skill-eval.py templates/agentic/skill-eval-job.sample.json --print-command
+          python3 scripts/prepare-skill-eval-baseline.py --inventory templates/agentic/host-capabilities.sample.json --output-dir .devgod/ci-eval-batch --scenarios 121 --hosts codex,claude --activation-modes explicit,implicit
+          python3 scripts/validate-skill-eval-batch.py .devgod/ci-eval-batch/manifest.json --root .
+          python3 scripts/validate-skill-eval-capture.py templates/agentic/skill-eval-capture.sample.json --root .
+          python3 scripts/grade-skill-eval-capture.py templates/agentic/skill-eval-capture.sample.json --oracle templates/agentic/skill-eval-oracle.sample.json --root . --output /tmp/devgod-skill-eval-grade.json
+          python3 scripts/validate-skill-eval-grade.py /tmp/devgod-skill-eval-grade.json --root .
+          python3 scripts/validate-devgod-telemetry.py templates/agentic/devgod-telemetry.sample.jsonl
+          python3 scripts/validate-host-capabilities.py templates/agentic/host-capabilities.sample.json
+          python3 scripts/scan-doc-supply-chain.py
+          python3 scripts/validate-skill-admission.py templates/agentic/skill-admission.sample.json
+          python3 scripts/validate-agent-incident.py templates/agentic/agent-incident.sample.json
+          python3 scripts/validate-orchestration-contract.py templates/agentic/orchestration-contract.sample.json
+          python3 scripts/validate-orchestration-run.py templates/agentic/orchestration-run.sample.json
+          python3 scripts/validate-browser-session.py templates/agentic/browser-session.sample.json
+          python3 scripts/run-browser-lanes.py templates/agentic/playwright-lane-plan.sample.json --root . --print-commands
+          python3 scripts/validate-agent-memory.py templates/agentic/agent-memory.sample.json
+          python3 scripts/validate-coordination-envelope.py templates/agentic/coordination-envelope.sample.json --root . --artifact-root templates/agentic/coordination-evidence
+          python3 scripts/validate-mcp-session.py templates/agentic/mcp-session.sample.json --evidence-root .
+          python3 scripts/validate-mcp-content.py templates/agentic/mcp-content.sample.json --evidence-root .
+          python3 scripts/compile-mcp-transcript.py --check-manifest templates/agentic/mcp-evidence/capture-manifest.json --evidence-root .
+
+  # Ship prose under unmachined's threshold (public scanner, no network at runtime).
+  # https://github.com/0xNyk/unmachined
+  prose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.11"
+
+      - name: Checkout unmachined scanner
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: 0xNyk/unmachined
+          ref: 36fb7c210136164993900397825271101778ae69
+          path: .unmachined
+          persist-credentials: false
+
+      - name: Scan shipped human docs for AI-slop tells
+        run: |
+          set -euo pipefail
+          # CHANGELOG.md is a release ledger, not prose: the whole-document
+          # repetitive-opener heuristic trips on any long changelog. It stays
+          # covered by the leak gate and Keep-a-Changelog structure checks.
+          for f in README.md CONTRIBUTING.md SECURITY.md SUPPORT.md \
+            docs/getting-started.md docs/verbs.md docs/slash-commands.md \
+            docs/enforcement-setup.md docs/architecture.md docs/modules.md \
+            docs/native-skills.md docs/releasing.md docs/README.md assets/BRAND.md; do
+            if [[ -f "$f" ]]; then
+              echo "--- $f"
+              UNMACHINED_ROOT=.unmachined bash scripts/devgod-output-gate.sh "$f"
+            fi
+          done
