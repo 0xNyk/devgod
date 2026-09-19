@@ -2,13 +2,10 @@
 .DS_Store
 *.swp
 *~
-.env
-.env.*
 !.env.example
 *.keypair
 id.json
 .idea/
-.vscode/
 *.log
 .cache/
 .venv/
@@ -23,3 +20,5 @@ __pycache__/
 
 # session state / plan artifacts (never publish)
 .devgod/
+config.bat
+node_modules
