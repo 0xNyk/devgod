@@ -4,6 +4,9 @@ DevGod uses one Agent Skills package: `SKILL.md`, its references, and its helper
 Each host reads the same checkout through its native skill directory. No plugin,
 MCP server, global rule, memory entry, or slash-command wrapper is required.
 
+Agent roles, model selection, and delegation controls follow
+[agent setup and model selection](../references/agent-model-selection.md).
+
 ## Install a reviewed checkout
 
 Requires Python 3.10+ and Bash on macOS/Linux, or WSL. The installer creates

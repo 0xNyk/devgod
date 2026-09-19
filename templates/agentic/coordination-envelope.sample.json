@@ -31,7 +31,7 @@
   "contract": {
     "id": "goal_audit",
     "path": "templates/agentic/orchestration-contract.sample.json",
-    "sha256": "6d09b825d9442418cc022af532960cb15ee29449b3a88ebf1438041d485122f1",
+    "sha256": "f798249307f405f94f2ee6901421289ff6043806f8186ca65f9e6c780775e975",
     "task_id": "task_code",
     "declared_sender": "manager",
     "declared_receiver": "code_worker",

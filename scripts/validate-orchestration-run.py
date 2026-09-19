@@ -2,13 +2,14 @@
 '''Validate observed multi-agent execution against its orchestration contract.'''
 
 from __future__ import annotations
-import argparse, hashlib, importlib.util, json, re, sys
+import argparse, hashlib, importlib.util, json, math, re, sys
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from evidence_path import regular_input_file
+from orchestration_models import validate_observed
 
 HEX=re.compile(r'^[0-9a-f]{64}$')
 KINDS={'agent','handoff','tool','guardrail','join','cancel','approval','synthesis','verify'}
@@ -34,7 +35,7 @@ def validate(d:Any, receipt:Path)->tuple[list[str],list[str]]:
     keys={'schema_version','receipt_kind','run','trace','artifacts','workers','spans','join','synthesis','review','decision'}
     if not isinstance(d,dict):return ['root must be an object'],[]
     if set(d)!=keys:e.append(f'root keys must be exactly {sorted(keys)}')
-    if d.get('schema_version')!=1:e.append('schema_version must be 1')
+    if d.get('schema_version')!=2:e.append('schema_version must be 2; recapture runtime model identity')
     kind=d.get('receipt_kind')
     if kind not in {'illustrative_fixture','captured_run'}:e.append('invalid receipt_kind')
     run=d.get('run',{});rkeys={'id','contract_path','contract_sha256','started_at','ended_at','environment','infrastructure_errors'}
@@ -65,19 +66,32 @@ def validate(d:Any, receipt:Path)->tuple[list[str],list[str]]:
     agents={a.get('id'):a for a in contract.get('agents',[]) if isinstance(a,dict)}
     lanes={x.get('agent_id'):x for x in contract.get('lanes',[]) if isinstance(x,dict)}
     workers=d.get('workers',[]);wmap={}
-    wkeys={'agent_id','parent_id','lease_id','heartbeats','lease_released','started_at','ended_at','outcome','steps','cost_usd','retries','output_artifact_id','cancelled_descendants'}
+    wkeys={'agent_id','parent_id','lease_id','heartbeats','lease_released','started_at','ended_at','outcome','steps','cost_usd','retries','output_artifact_id','cancelled_descendants','execution'}
     if not isinstance(workers,list):e.append('workers must be an array');workers=[]
     for i,w in enumerate(workers):
         if not isinstance(w,dict) or set(w)!=wkeys:e.append(f'worker {i} keys invalid');continue
         aid=w.get('agent_id')
         if aid not in agents or aid in wmap:e.append(f'worker {i} agent invalid or duplicate');continue
         wmap[aid]=w
-        if w.get('parent_id')!=agents[aid].get('parent_id') or not text(w.get('lease_id')) or not isinstance(w.get('heartbeats'),int) or w.get('heartbeats')<1 or w.get('lease_released') is not True or not ts(w.get('started_at')) or not ts(w.get('ended_at')) or w.get('outcome') not in {'success','failed','cancelled','infrastructure_error'} or not isinstance(w.get('steps'),int) or w.get('steps')<0 or not isinstance(w.get('cost_usd'),(int,float)) or isinstance(w.get('cost_usd'),bool) or w.get('cost_usd')<0 or not isinstance(w.get('retries'),int) or w.get('retries')<0 or not isinstance(w.get('cancelled_descendants'),list):e.append(f'worker {aid} runtime fields invalid')
+        g.extend(f'worker {aid}: {issue}' for issue in validate_observed(w.get('execution'),agents[aid].get('model_selection')))
+        if w.get('parent_id')!=agents[aid].get('parent_id') or not text(w.get('lease_id')) or not isinstance(w.get('heartbeats'),int) or w.get('heartbeats')<1 or w.get('lease_released') is not True or not ts(w.get('started_at')) or not ts(w.get('ended_at')) or w.get('outcome') not in {'success','failed','cancelled','infrastructure_error'} or not isinstance(w.get('steps'),int) or w.get('steps')<0 or not isinstance(w.get('cost_usd'),(int,float)) or isinstance(w.get('cost_usd'),bool) or not math.isfinite(w.get('cost_usd')) or w.get('cost_usd')<0 or not isinstance(w.get('retries'),int) or w.get('retries')<0 or not isinstance(w.get('cancelled_descendants'),list):e.append(f'worker {aid} runtime fields invalid')
         budget=agents[aid].get('budget',{})
         if w.get('steps',0)>budget.get('max_steps',0) or w.get('cost_usd',0)>budget.get('max_cost_usd',0) or w.get('retries',0)>contract.get('limits',{}).get('max_retries_per_task',0):g.append(f'worker {aid} exceeded budget')
         out=w.get('output_artifact_id')
         if w.get('outcome')=='success' and (out not in amap or amap[out].get('producer_agent')!=aid):g.append(f'worker {aid} success lacks its output artifact')
     if set(wmap)!=set(agents):g.append('workers must cover every contracted agent exactly once')
+    events=[]
+    for aid,w in wmap.items():
+        start,end=ts(w.get('started_at')),ts(w.get('ended_at'))
+        if start and end and start.tzinfo and end.tzinfo and end>start:
+            events.extend(((start,1),(end,-1)))
+            if (end-start).total_seconds()>agents[aid].get('budget',{}).get('max_wall_seconds',0):g.append(f'worker {aid} exceeded wall time budget')
+        else:e.append(f'worker {aid} requires ordered timezone-aware execution times')
+    active=0
+    for _,delta in sorted(events):
+        active+=delta
+        if active>contract.get('limits',{}).get('max_concurrent_agents',0):
+            g.append('observed concurrency exceeds contract');break
     if sum(w.get('steps',0) for w in workers if isinstance(w,dict))>contract.get('limits',{}).get('max_steps',0) or sum(w.get('cost_usd',0) for w in workers if isinstance(w,dict))>contract.get('limits',{}).get('max_cost_usd',0):g.append('global runtime budget exceeded')
 
     spans=d.get('spans',[]);smap={};handoffs=set();kinds=set();tool_counts={a:0 for a in agents}
@@ -86,7 +100,7 @@ def validate(d:Any, receipt:Path)->tuple[list[str],list[str]]:
     for i,s in enumerate(spans):
         if not isinstance(s,dict) or set(s)!=skeys:e.append(f'span {i} keys invalid');continue
         sid=s.get('span_id');kindx=s.get('kind');aid=s.get('agent_id')
-        if s.get('seq')!=i+1 or not text(sid) or sid in smap or kindx not in KINDS or aid not in agents or not ts(s.get('started_at')) or not ts(s.get('ended_at')) or s.get('status') not in {'ok','error','cancelled'} or not isinstance(s.get('cost_usd'),(int,float)) or isinstance(s.get('cost_usd'),bool) or s.get('cost_usd')<0 or not isinstance(s.get('steps'),int) or s.get('steps')<0 or not isinstance(s.get('retry'),int) or s.get('retry')<0 or not isinstance(s.get('artifact_ids'),list) or any(x not in amap for x in s.get('artifact_ids',[])) or s.get('redacted') is not True:e.append(f'span {i} metadata invalid');continue
+        if s.get('seq')!=i+1 or not text(sid) or sid in smap or kindx not in KINDS or aid not in agents or not ts(s.get('started_at')) or not ts(s.get('ended_at')) or s.get('status') not in {'ok','error','cancelled'} or not isinstance(s.get('cost_usd'),(int,float)) or isinstance(s.get('cost_usd'),bool) or not math.isfinite(s.get('cost_usd')) or s.get('cost_usd')<0 or not isinstance(s.get('steps'),int) or s.get('steps')<0 or not isinstance(s.get('retry'),int) or s.get('retry')<0 or not isinstance(s.get('artifact_ids'),list) or any(x not in amap for x in s.get('artifact_ids',[])) or s.get('redacted') is not True:e.append(f'span {i} metadata invalid');continue
         smap[sid]=s;kinds.add(kindx)
         parent=s.get('parent_span_id')
         if sid==trace.get('root_span_id'):
@@ -120,6 +134,7 @@ def validate(d:Any, receipt:Path)->tuple[list[str],list[str]]:
     if set(dec)!={'outcome','reasons','unresolved_risks'} or dec.get('outcome') not in {'pass','fail','infrastructure_error'} or not isinstance(dec.get('reasons'),list) or not dec.get('reasons') or any(not text(x) for x in dec.get('reasons',[])) or not isinstance(dec.get('unresolved_risks'),list):e.append('decision invalid')
     if dec.get('outcome')=='pass':
         if kind!='captured_run':g.append('only a captured_run may pass')
+        if contract.get('receipt_kind')!='captured_contract':g.append('passing run requires a captured contract')
         if run.get('infrastructure_errors') or dec.get('unresolved_risks') or review.get('approved') is not True:g.append('passing run requires no infrastructure errors or unresolved risks and approved review')
     return e,g
 
