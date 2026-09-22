@@ -4,7 +4,7 @@
   "run_id": "devgod-routing-smoke-001",
   "job": {
     "path": "templates/agentic/skill-eval-job.sample.json",
-    "sha256": "602d07a7181bbd9ab1a6075e818886e6744c76df379073be69f466faa77f0b36"
+    "sha256": "9a910e02717615bfc138be537254339242af997c0403f2cf92201174dfd1d6f1"
   },
   "host": "codex",
   "model": "default",
@@ -19,7 +19,7 @@
     "reason": "Illustrative host binding used only to validate manifest structure."
   },
   "skill_binding": {
-    "sha256": "c29ab7d08eb7c64e3c497e9c63412f3ceba95fd261278484f31a59ded0289813",
+    "sha256": "5c912b621b6d5185eddbfb35cc9f1c66cc601b8683c491faada646b71af44664",
     "version": "1.90.0",
     "expectations_excluded": true,
     "runtime_supplied": true,

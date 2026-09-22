@@ -21,7 +21,7 @@
   },
   "skill_bundle": {
     "source_root": ".",
-    "sha256": "c29ab7d08eb7c64e3c497e9c63412f3ceba95fd261278484f31a59ded0289813",
+    "sha256": "5c912b621b6d5185eddbfb35cc9f1c66cc601b8683c491faada646b71af44664",
     "version": "1.90.0",
     "include": ["SKILL.md", "COMPAT.md", "agents", "commands", "references", "scripts", "templates"],
     "exclude_prefixes": ["scripts/capture-skill-eval.py", "scripts/test-skill-eval-capture", "scripts/validate-skill-eval-capture.py", "templates/agentic/host-capabilities", "templates/agentic/skill-eval", "templates/agentic/devgod-telemetry", "templates/fixtures/skill-eval"],
