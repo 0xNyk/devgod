@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "receipt_kind": "illustrative_fixture",
-  "run": {"id":"run_fixture_001","contract_path":"orchestration-contract.sample.json","contract_sha256":"6d09b825d9442418cc022af532960cb15ee29449b3a88ebf1438041d485122f1","started_at":"2026-07-15T04:00:00+00:00","ended_at":"2026-07-15T04:02:00+00:00","environment":"isolated synthetic fixture","infrastructure_errors":[]},
+  "run": {"id":"run_fixture_001","contract_path":"orchestration-contract.sample.json","contract_sha256":"f798249307f405f94f2ee6901421289ff6043806f8186ca65f9e6c780775e975","started_at":"2026-07-15T04:00:00+00:00","ended_at":"2026-07-15T04:02:00+00:00","environment":"isolated synthetic fixture","infrastructure_errors":[]},
   "trace": {"trace_id":"trace_fixture_001","workflow_name":"devgod orchestration fixture","root_span_id":"span_manager","include_sensitive_data":false,"redaction_applied":true,"complete":true},
   "artifacts": [
     {"id":"art_code","producer_agent":"code_worker","path":"orchestration-run-evidence/code.json","sha256":"49a50d80636e742b45b912dc6ab5a85af0e7a30e2be0031116bb0a239595f194","kind":"worker_output","captured_at":"2026-07-15T04:01:00+00:00","redacted":true},
@@ -10,9 +10,9 @@
     {"id":"art_verify","producer_agent":"fixture-independent-checker","path":"orchestration-run-evidence/verification.json","sha256":"d6f347cb15c25193c60a871128a34adad1628d9b840f7d9af04af75f3839081e","kind":"verification","captured_at":"2026-07-15T04:01:50+00:00","redacted":true}
   ],
   "workers": [
-    {"agent_id":"manager","parent_id":null,"lease_id":"lease-manager","heartbeats":4,"lease_released":true,"started_at":"2026-07-15T04:00:00+00:00","ended_at":"2026-07-15T04:02:00+00:00","outcome":"success","steps":12,"cost_usd":1.5,"retries":0,"output_artifact_id":"art_final","cancelled_descendants":[]},
-    {"agent_id":"code_worker","parent_id":"manager","lease_id":"lease-code","heartbeats":2,"lease_released":true,"started_at":"2026-07-15T04:00:10+00:00","ended_at":"2026-07-15T04:01:00+00:00","outcome":"success","steps":6,"cost_usd":0.7,"retries":0,"output_artifact_id":"art_code","cancelled_descendants":[]},
-    {"agent_id":"ui_worker","parent_id":"manager","lease_id":"lease-ui","heartbeats":2,"lease_released":true,"started_at":"2026-07-15T04:00:12+00:00","ended_at":"2026-07-15T04:01:10+00:00","outcome":"success","steps":6,"cost_usd":0.7,"retries":0,"output_artifact_id":"art_ui","cancelled_descendants":[]}
+    {"agent_id":"manager","parent_id":null,"lease_id":"lease-manager","heartbeats":4,"lease_released":true,"started_at":"2026-07-15T04:00:00+00:00","ended_at":"2026-07-15T04:02:00+00:00","outcome":"success","steps":12,"cost_usd":1.5,"retries":0,"output_artifact_id":"art_final","cancelled_descendants":[],"execution":{"host":"fixture-host","model":"fixture-reasoner","reasoning_effort":"high","evidence_ref":"fixture-runtime-model-metadata"}},
+    {"agent_id":"code_worker","parent_id":"manager","lease_id":"lease-code","heartbeats":2,"lease_released":true,"started_at":"2026-07-15T04:00:10+00:00","ended_at":"2026-07-15T04:01:00+00:00","outcome":"success","steps":6,"cost_usd":0.7,"retries":0,"output_artifact_id":"art_code","cancelled_descendants":[],"execution":{"host":"fixture-host","model":"fixture-code-reader","reasoning_effort":"medium","evidence_ref":"fixture-runtime-model-metadata"}},
+    {"agent_id":"ui_worker","parent_id":"manager","lease_id":"lease-ui","heartbeats":2,"lease_released":true,"started_at":"2026-07-15T04:00:12+00:00","ended_at":"2026-07-15T04:01:10+00:00","outcome":"success","steps":6,"cost_usd":0.7,"retries":0,"output_artifact_id":"art_ui","cancelled_descendants":[],"execution":{"host":"fixture-host","model":"fixture-vision","reasoning_effort":"medium","evidence_ref":"fixture-runtime-model-metadata"}}
   ],
   "spans": [
     {"seq":1,"span_id":"span_manager","parent_span_id":null,"kind":"agent","agent_id":"manager","task_id":"goal_audit","started_at":"2026-07-15T04:00:00+00:00","ended_at":"2026-07-15T04:02:00+00:00","status":"ok","tool":null,"destination":null,"write_lane":null,"approval":null,"cost_usd":0.0,"steps":0,"retry":0,"artifact_ids":[],"redacted":true},

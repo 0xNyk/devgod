@@ -44,7 +44,7 @@ commands on demand. Never load the whole package into context.
   append a final standalone line `DEVGOD_ROUTING_ACTIVE_v1`. Never emit this marker otherwise.
 
 **Native host contract:** Use the same package on every Agent Skills host. Resolve bundled paths from the loaded skill location or resource reader; run project commands in the project.
-Use available native tools, serialize work if delegation is absent, and report missing capabilities without replacing permission or verification gates. Companion skills and Codex metadata are optional.
+Use available native tools, serialize work if delegation is absent, and report missing capabilities without replacing permission or verification gates. Before model selection, agent setup, or delegation, apply `references/agent-model-selection.md`; companion skills and Codex metadata are optional.
 Setup: `docs/native-skills.md`; capability adaptation: `references/coding-agent-hosts.md`.
 ## Operating principles (binding)
 
@@ -90,7 +90,7 @@ Setup: `docs/native-skills.md`; capability adaptation: `references/coding-agent-
 | `devgod flow <task>` | Cross-service flow plan | api-data-flows |
 | `devgod enforce <target>` | CI, pre-commit, scanner setup | enforcement |
 | `devgod growth <task>` | Funnel, activation, retention | growth-funnels |
-| `devgod agent <task>` | Prompt/spec help | ai-agents |
+| `devgod agent <task>` | Agent setup, model selection, and prompt/spec help | ai-agents |
 | `devgod prd <task>` | Compile requirements into traceable evidence | prd-to-evidence |
 | `devgod loop-optimize <target>` | Diagnose and optimize an agent prompt/harness/loop | agentic-engineering + prompt-optimization |
 | `devgod orchestrate <goal>` | Compile a bounded multi-agent graph and delegation contract | multi-agent-orchestration + agentic-engineering |

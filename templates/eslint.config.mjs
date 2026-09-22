@@ -12,6 +12,10 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FlatCompat } from "@eslint/eslintrc";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import { createRequire } from 'module';
+
+var require = createRequire(import.meta.url);
+var module = { exports: {} };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

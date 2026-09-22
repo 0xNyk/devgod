@@ -62,6 +62,10 @@ components/ui/ @your-team/design-system
 
 ### Agent enforcement
 
+Agent setup and model selection follow `agent-model-selection.md`. Delegated runs
+must pass the orchestration contract and runtime validators. Host controls enforce
+permissions; passing an artifact validator alone does not enforce a running agent.
+
 When building with devgod, run mentally (or explicitly):
 
 ```

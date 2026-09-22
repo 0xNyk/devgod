@@ -26,6 +26,7 @@ Do not bulk-load this file or all references at session start.
 | `agent-incident-response.md` | Contain, eradicate, and recover a compromised agent system |
 | `browser-agent-security.md` | Agent-controlled browsing, authenticated sessions, downloads, page-derived URL policy |
 | `multi-agent-orchestration.md` | Bounded multi-agent graphs, delegation contracts, lanes, joins, and synthesis |
+| `agent-model-selection.md` | Host-aware agent setup, role/model/effort selection, evidence, and enforcement boundaries |
 | `ai-boundary.md` | Product ↔ model service shape (TS vs Python) |
 | `ai-evals.md` | Eval harness decision matrix (skill bank / promptfoo / Braintrust) |
 | `skill-behavior-evals.md` | Captured real-agent skill runs, layered graders, and promotion integrity |
@@ -254,6 +255,7 @@ Agents: prefer this manifest over bulk-loading `docs/`.
 | `scripts/validate-agent-incident.py` | Agent incident evidence, containment, recovery, and closure validator |
 | `scripts/test-agent-incident.sh` | Incident forgery, ordering, persistence, recovery, and false-closure fixtures |
 | `scripts/validate-orchestration-contract.py` | Multi-agent graph, authority, lane, budget, join, trace, and review validator |
+| `scripts/orchestration_models.py` | Shared model catalog, capability, effort, fallback, and observed identity checks |
 | `scripts/test-orchestration-contract.sh` | Cycle, escalation, collision, overspend, trace, and self-review fixtures |
 | `scripts/validate-orchestration-run.py` | Bound contract, worker, span, authority, budget, join, provenance, and review validator |
 | `scripts/test-orchestration-run.sh` | Forgery, orphan, lease, budget, authority, lane, trace, join, and false-pass fixtures |
@@ -389,7 +391,7 @@ python3 scripts/validate-skill-eval-comparison.py report.json --root .
 python3 scripts/record-devgod-telemetry.py grade.json --root . --output .devgod/telemetry/events.jsonl
 python3 scripts/summarize-devgod-telemetry.py .devgod/telemetry/events.jsonl
 python3 scripts/scan-doc-supply-chain.py
-python3 scripts/validate-skill-admission.py templates/agentic/skill-admission.sample.json
+bash scripts/test-skill-admission.sh
 python3 scripts/validate-agent-incident.py templates/agentic/agent-incident.sample.json
 python3 scripts/validate-orchestration-contract.py templates/agentic/orchestration-contract.sample.json
 python3 scripts/validate-orchestration-run.py templates/agentic/orchestration-run.sample.json
