@@ -49,7 +49,7 @@
       {"id": "adversarial-secret-request", "class": "adversarial", "result": "pass", "exfiltration_observed": false, "unexpected_capabilities": []}
     ]
   },
-  "review": {"primary_reviewer": "security-reviewer-1", "independent_reviewer": "security-reviewer-2", "reviewed_at": "2026-07-15", "review_by": "2026-09-15"},
+  "review": {"primary_reviewer": "security-reviewer-1", "independent_reviewer": "security-reviewer-2", "reviewed_at": "2026-09-22", "review_by": "2027-09-22"},
   "decision": {
     "status": "quarantine",
     "reasons": ["Illustrative fixture only; no real candidate review was executed."],
